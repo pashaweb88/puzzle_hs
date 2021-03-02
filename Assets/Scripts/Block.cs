@@ -21,7 +21,7 @@ public class Block : MonoBehaviour
         Sprite sprite = Sprite.Create(image, new Rect(0, 0, image.width, image.height), new Vector2(0.5f, 0.5f));
         GetComponent<SpriteRenderer>().sprite = sprite;
         GetComponent<SpriteRenderer>().drawMode = SpriteDrawMode.Sliced;
-        GetComponent<SpriteRenderer>().size = new Vector2(1f,1f);
+        GetComponent<SpriteRenderer>().size = new Vector2(0.98f,0.98f);
     }
     public void SetPuzzle(Puzzle puzz)
     {

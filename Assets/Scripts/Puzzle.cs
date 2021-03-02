@@ -1,29 +1,81 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 public class Puzzle : MonoBehaviour
 {
     // TODO CHECK IS MOVE FINISHING.
 
-    [SerializeField] private  Texture2D image;
+    [SerializeField] private Texture2D[] images;
     [SerializeField] private int blocksPerLine = 4;
     [SerializeField] private GameObject blockPrefab;
     [SerializeField] private GameObject gridImage;
+
+    [SerializeField] private TextMeshProUGUI timerText;
+    [SerializeField] private TextMeshProUGUI moveText;
+    [SerializeField] private TextMeshProUGUI levelText;
+    
+    [SerializeField] private GameObject looseUI;
+    [SerializeField] private GameObject winUI;
+
+    [SerializeField] private GameObject gameSceneCo;
+
     private GameObject[,] blocks;
     private GameObject emptyBlock;
     private bool canMove = true;
     private int shuffleMoveCounter = 100;
+
+    private int timer = 200;
+    private bool isTimerIncrease = true;
+
+    private int movesCounter = 100;
+
+    private int levelIndex = 0;
+    
     // Start is called before the first frame update
     void Start()
     {
+        if (PlayerPrefs.HasKey("saver"))
+        {
+            levelIndex = PlayerPrefs.GetInt("saver");
+        }
+
+        levelText.SetText("LEVEL: " + (levelIndex + 1));
+
         blocks = new GameObject[blocksPerLine, blocksPerLine];
         CreatePuzzles();
     }
+    private void Update()
+    {
+        if (isTimerIncrease)
+        {
+            isTimerIncrease = false;
+            StartCoroutine(TimerIncrease());
+        }
+    }
 
+    IEnumerator TimerIncrease()
+    {
+        yield return new WaitForSeconds(1f);
+        timer--;
+        timerText.SetText("TIME: " + timer);
+        if (timer <= 0)
+        {
+            looseUI.SetActive(true);
+        } else
+        {
+            isTimerIncrease = true;
+        }
+        
+    }
+    IEnumerator WinAction()
+    {
+        yield return new WaitForSeconds(1f);
+        winUI.SetActive(true);
+    }
     private void CreatePuzzles()
     {
-        Texture2D[,] imageParts = ImageSclicer.GetSlices(image, blocksPerLine);
+        Texture2D[,] imageParts = ImageSclicer.GetSlices(images[levelIndex], blocksPerLine);
 
         for (int y = 0; y < blocksPerLine; y++)
         {
@@ -96,13 +148,35 @@ public class Puzzle : MonoBehaviour
         if (matchCounter == blocksPerLine*blocksPerLine)
         {
             emptyBlock.SetActive(true);
+
+            for (int y = 0; y < blocksPerLine; y++)
+            {
+                for (int x = 0; x < blocksPerLine; x++)
+                {
+                    blocks[x, y].GetComponent<SpriteRenderer>().size = new Vector2(1f, 1f);
+                }
+            }
+
+            StartCoroutine(WinAction());
+           
+
+            PlayerPrefs.SetInt("saver", levelIndex + 1);
         }
     }
 
     public void SetCanMoveTrue()
     {
         CheckGameWin();
-        canMove = true;
+        movesCounter--;
+        moveText.SetText("MOVES: " + movesCounter);
+        if (movesCounter <= 0)
+        {
+            looseUI.SetActive(true);
+        } else
+        {
+            canMove = true;
+        }
+        
         
     }
 
@@ -142,6 +216,17 @@ public class Puzzle : MonoBehaviour
         }
         
 
+    }
+
+    public void OnHomeButtonClick()
+    {
+        looseUI.SetActive(true);
+        gameSceneCo.GetComponent<GameSceneCo>().homeButtonClick = true;
+    }
+
+    public void OnRestartButtonClick()
+    {
+        looseUI.SetActive(true);
     }
 
 }
