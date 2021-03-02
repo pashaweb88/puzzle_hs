@@ -6,8 +6,8 @@ public class Puzzle : MonoBehaviour
 {
     // TODO CHECK IS MOVE FINISHING.
 
-    [SerializeField] private Texture2D[] images;
-    [SerializeField] private int blocksPerLine = 4;
+    [SerializeField] private LevelSettings[] levels;
+    private int blocksPerLine = 3;
     [SerializeField] private GameObject blockPrefab;
     [SerializeField] private GameObject gridImage;
 
@@ -19,6 +19,9 @@ public class Puzzle : MonoBehaviour
     [SerializeField] private GameObject winUI;
 
     [SerializeField] private GameObject gameSceneCo;
+
+    private InitGameObject initGameObject;
+    private Texture2D[] images;
 
     private GameObject[,] blocks;
     private GameObject emptyBlock;
@@ -40,10 +43,22 @@ public class Puzzle : MonoBehaviour
             levelIndex = PlayerPrefs.GetInt("saver");
         }
 
-        levelText.SetText("LEVEL: " + (levelIndex + 1));
+        SetLevelSettings();
 
         blocks = new GameObject[blocksPerLine, blocksPerLine];
         CreatePuzzles();
+    }
+
+    private void SetLevelSettings()
+    {
+        initGameObject = FindObjectOfType<InitGameObject>();
+        images = initGameObject.GetImages();
+        blocksPerLine = levels[levelIndex].GetBlocksPerLine();
+        timer = levels[levelIndex].GetTimer();
+        movesCounter = levels[levelIndex].GetMoves();
+        timerText.SetText(timer.ToString());
+        moveText.SetText(movesCounter.ToString());
+        levelText.SetText("LEVEL: " + (levelIndex + 1));
     }
     private void Update()
     {
